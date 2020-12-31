@@ -41,14 +41,18 @@ type fsEntity struct {
 // Website represents a set of related web pages located under a single domain.
 // Each web page can cantain zero or more links.
 type Website struct {
-	root *fsEntity
+	root        *fsEntity
+	pingResults map[string]int
 }
 
 // New allocates and initializes a new instance of the Website structure.
 func New() *Website {
 	ent := allocateFSEntity("/")
 	ent.directory = true
-	return &Website{root: ent}
+	return &Website{
+		root:        ent,
+		pingResults: make(map[string]int),
+	}
 }
 
 // AddFile registers a non-HTML file.
@@ -200,7 +204,7 @@ func validate(website *Website, entity *fsEntity) []error {
 		// Check if this is a website URL.
 		if strings.HasPrefix(href, "http") {
 			// Ping the URL and make sure it's active.
-			status, err := ping(href)
+			status, err := ping(website, href)
 			if err != nil {
 				errors = append(errors, fmt.Errorf("%s: encountered error when pinging '%s'", entity.fullname, href))
 			} else if status != 200 {
@@ -319,19 +323,25 @@ func newFSEntity(root *fsEntity, path string) *fsEntity {
 	return createFSEntity(root, strings.Split(path, "/"))
 }
 
-func ping(url string) (int, error) {
+func ping(website *Website, url string) (int, error) {
+	if code, exists := website.pingResults[url]; exists {
+		return code, nil
+	}
 	var client = http.Client{
 		Timeout:   2 * time.Second,
 		Transport: &http.Transport{},
 	}
 	req, err := http.NewRequest("HEAD", url, nil)
 	if err != nil {
+		website.pingResults[url] = 0
 		return 0, err
 	}
 	resp, err := client.Do(req)
 	if err != nil {
+		website.pingResults[url] = 0
 		return 0, err
 	}
 	resp.Body.Close()
+	website.pingResults[url] = resp.StatusCode
 	return resp.StatusCode, nil
 }

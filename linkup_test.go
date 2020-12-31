@@ -217,7 +217,6 @@ func addWebsite(path string, website *Website) {
 			default:
 				return website.AddFile(relativeName)
 			}
-			return nil
 		})
 
 	// Restore the original current working directory
