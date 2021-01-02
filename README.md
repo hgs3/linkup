@@ -7,6 +7,8 @@ It works by inspecting your sites HTML documents and verifying all links refer t
 It understands links in `a`, `img`, `script`, `link`, and `source` tags.
 External links are verified by pinging them.
 
+[![Actions Status](https://github.com/hgs3/linkup/workflows/Build%20Status/badge.svg)](https://github.com/hgs3/linkup/actions)
+
 ## Example Usage
 
 All documents and files are added relative to the root of the domain.
