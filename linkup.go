@@ -20,6 +20,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 	"strings"
 	"time"
@@ -72,7 +73,6 @@ func (w *Website) AddDocument(name string) error {
 	name = prepareFileName(name)
 	file, err := os.Open(name)
 	if err != nil {
-		fmt.Println(err)
 		return err
 	}
 	defer file.Close()
@@ -90,7 +90,6 @@ func (w *Website) AddDocumentFromReader(name string, reader io.Reader) error {
 
 	doc, err := goquery.NewDocumentFromReader(reader)
 	if err != nil {
-		fmt.Println(err)
 		return err
 	}
 
@@ -200,6 +199,9 @@ func validate(website *Website, entity *fsEntity) []error {
 		// Perform some sanitization on the string.
 		href = strings.TrimSpace(href)
 		href = strings.Replace(href, "\\", "/", -1)
+		if uhref, err := url.QueryUnescape(href); err == nil {
+			href = uhref
+		}
 
 		// Check if this is a website URL.
 		if strings.HasPrefix(href, "http") {

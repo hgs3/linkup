@@ -167,6 +167,12 @@ func TestInvalidSource(t *testing.T) {
 	})
 }
 
+func TestEscapeCharacters(t *testing.T) {
+	w := New()
+	addWebsite("testdata/escape", w)
+	verifyErrors(t, w.Validate(), []string{})
+}
+
 func verifyErrors(t *testing.T, actualErrors []error, expectedErrors []string) {
 	if len(actualErrors) != len(expectedErrors) {
 		t.Error("Error count mismatch", len(actualErrors), len(expectedErrors))
